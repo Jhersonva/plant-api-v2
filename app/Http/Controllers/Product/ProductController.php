@@ -16,6 +16,7 @@ use App\Exceptions\Product\ProductExists;
 use App\Exceptions\Product\NotFoundProduct;
 use App\Http\utils\Product\FindProductExists;
 use App\Http\Requests\Product\ValidateProductRequest;
+use App\Models\Pdf;
 
 class ProductController extends Controller
 {
@@ -258,27 +259,39 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function deleteProduct(int $productId): JsonResponse
+    public function deleteProduct(int $id): JsonResponse
     {
-        $product = Product::find($productId);
+        DB::transaction(function () use ($id) {
+            $product = Product::find($id);
 
-        if (!$product) {
-            throw new NotFoundProduct;
-        }
+            if ($product) {
+                if ($product->image) {
+                    $this->deleteImage($product->image->url);
+                    $product->image()->delete();
+                }
 
-        if ($product->image) {
-            $this->deleteImage($product->image->url);
-            $product->image()->delete();
-        }
+                $pdf = $product->pdf;
 
-        if ($product->pdf) {
-            $this->deletePDF($product->pdf->url);
-            $product->pdf()->delete();
-        }
+                $product->delete();
 
-        $product->delete();
+                if ($pdf) {
+                    $this->deletePDF($pdf->url);
+                    $pdf->delete();
+                }
 
-        return new JsonResponse(['data' => 'Producto eliminado']);
+            } else {
+                $pdf = Pdf::find($id);
+
+                if ($pdf) {
+                    $this->deletePDF($pdf->url);
+                    $pdf->delete();
+                } else {
+                    throw new \Exception('Producto no encontrado');
+                }
+            }
+        });
+
+        return new JsonResponse(['data' => 'Producto eliminado correctamente']);
     }
 
     /**
