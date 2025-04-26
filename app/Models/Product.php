@@ -1,12 +1,11 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-
 class Product extends Model
 {
     protected $fillable = [
@@ -17,10 +16,12 @@ class Product extends Model
         'price',
         'stock',
         'pdf_id',
-        'status'
+        'status',
+        'category_id',
     ];
     protected $hidden = [
-        'pdf_id'
+        'pdf_id',
+        'category_id', 
     ];
 
     public function pdf(): BelongsTo
@@ -33,9 +34,14 @@ class Product extends Model
         return $this->morphOne(Image::class, 'imageble');
     }
 
-    public function subCategories(): BelongsToMany
+    public function category(): BelongsTo
     {
-        return $this->belongsToMany(Subcategory::class, 'product_subcategory');
+        return $this->belongsTo(Category::class);
+    }
+
+    public function subCategories()
+    {
+        return $this->belongsToMany(SubCategory::class, 'product_subcategory', 'product_id', 'subcategory_id');
     }
 
     protected static function booted()

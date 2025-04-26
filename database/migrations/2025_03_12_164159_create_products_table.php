@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('stock');
             $table->boolean('status')->default(true);
             $table->foreignId('pdf_id')->constrained('pdfs');
+            $table->foreignId('category_id')->constrained('categories');
             $table->timestamps();
         });
     }
