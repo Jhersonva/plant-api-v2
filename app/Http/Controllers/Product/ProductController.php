@@ -94,8 +94,10 @@ class ProductController extends Controller
         $benefits = implode('益', $request->benefits);
 
         DB::transaction(function () use ($request, $benefits) {
-            $pdfId = $this->storePDF(null);
-            $productId = Product::create([
+            $pdfId = $this->storePDF($request->pdf); 
+
+            // Crear el producto
+            $product = Product::create([
                 'name' => $request->name,
                 'characteristics' => $request->characteristics,
                 'benefits' => $benefits,
@@ -103,18 +105,24 @@ class ProductController extends Controller
                 'price' => $request->price,
                 'stock' => $request->stock,
                 'pdf_id' => $pdfId,
-            ])->id;
+                'category_id' => $request->category_id,
+            ]);
 
-            $product = Product::find($productId);
+            // Asociar las subcategorías
             $product->subCategories()->attach($request->subcategory_id);
 
-            $image = $this->saveImageBase64($request->image, 'products');
-            $product->image()->create([
-                'url' => $image
-            ]);
+            // Guardar la imagen (si existe)
+            if ($request->has('image')) {
+                $image = $this->saveImageBase64($request->image, 'products');
+                $product->image()->create([
+                    'url' => $image
+                ]);
+            }
         });
+
         return new JsonResponse(['data' => 'Producto registrado']);
     }
+
 
     /**
      * @OA\Put(
@@ -178,38 +186,48 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function updateProduct(string $nameProduct, Request $request)
+    public function updateProduct(int $productId, Request $request)
     {
-        $product = Product::where('name', $nameProduct)->first();
+        $product = Product::find($productId);
         if (!$product) {
             throw new NotFoundProduct();
         }
-        $sameName = $nameProduct !== $request->name;
-        if ($sameName) {
-            $this->validateProducRequest($request);
-        }
-        $benefits = implode('益', $request->benefits);
 
-        $status = true;
-        if ($request->stock === 0) {
-            $status = false;
+        // Validar los datos del producto
+        $this->validateProducRequest($request);
+
+        // Sincronizar subcategorías
+        if ($request->has('subcategory_id')) {
+            $subcategoryIds = array_unique($request->subcategory_id);
+            $product->subCategories()->sync($subcategoryIds);
         }
+
+        // Actualizar otros datos del producto
         $product->update([
             'name' => $request->name,
             'characteristics' => $request->characteristics,
-            'benefits' => $benefits,
+            'benefits' => implode('益', $request->benefits),
             'compatibility' => $request->compatibility,
             'price' => $request->price,
             'stock' => $request->stock,
-            'status' => $status
+            'status' => $request->stock == 0 ? false : true,
+            'category_id' => $request->category_id,
         ]);
-        $image = $this->saveImage($request->image, 'products');
-        $this->deleteImage($product->image->url);
-        $product->subCategories()->sync($request->subcategory_id);
-        $product->image()->update([
-            'url' => $image
-        ]);
-        return new JsonResponse(['data' => 'Registro actualizado']);
+
+        // Si se envía una imagen o un PDF, puedes agregar la lógica para actualizarlos aquí (opcional)
+        if ($request->has('image')) {
+            $product->image()->update([
+                'url' => $request->image['url'] ?? null,
+            ]);
+        }
+
+        if ($request->has('pdf')) {
+            $product->pdf()->update([
+                'url' => $request->pdf['url'] ?? null,
+            ]);
+        }
+
+        return new JsonResponse(['data' => $product], 200);
     }
 
     /**
@@ -240,17 +258,26 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function deleteProduct(string $nameProduct): JsonResponse
+    public function deleteProduct(int $productId): JsonResponse
     {
-        $product = Product::where('name', $nameProduct)->first();
+        $product = Product::find($productId);
+
         if (!$product) {
             throw new NotFoundProduct;
         }
-        $this->deleteImage($product->image->url);
-        $this->deletePDF($product->pdf->url);
+
+        if ($product->image) {
+            $this->deleteImage($product->image->url);
+            $product->image()->delete();
+        }
+
+        if ($product->pdf) {
+            $this->deletePDF($product->pdf->url);
+            $product->pdf()->delete();
+        }
+
         $product->delete();
-        $product->image()->delete();
-        $product->pdf()->delete();
+
         return new JsonResponse(['data' => 'Producto eliminado']);
     }
 
@@ -331,9 +358,9 @@ class ProductController extends Controller
         $limit = $request->query('limit');
 
         $user = auth('api')->user();
-        $products = Product::select('id', 'name', 'price', 'stock', 'status')
+        $products = Product::select('id', 'name', 'characteristics', 'benefits', 'compatibility', 'price', 'stock', 'status')
             ->with([
-                'subCategories.category:id,name',
+                'subCategories.category:id,name', 
                 'image:id,imageble_id,url',
             ])
             ->when($nameProduct, function ($query) use ($nameProduct) {
@@ -355,30 +382,27 @@ class ProductController extends Controller
             ->paginate($limit);
 
         $products->getCollection()->transform(function (Product $product) {
-            $grouped = [];
+            $category = null; 
 
-            foreach ($product->subCategories as $sub) {
-                $category = $sub->category;
-                $catId = $category->id;
-
-                if (!isset($grouped[$catId])) {
-                    $grouped[$catId] = [
-                        'id' => $catId,
-                        'name' => $category->name,
-                        'sub_categories' => [],
-                    ];
-                }
-
-                $grouped[$catId]['sub_categories'][] = [
-                    'id' => $sub->id,
-                    'name' => $sub->name,
-                ];
+           
+            if ($product->subCategories->isNotEmpty()) {
+                $category = $product->subCategories->first()->category; 
             }
 
-            // Agregamos la propiedad virtual 'categories'
-            $product->setAttribute('categories', array_values($grouped));
+            // Asocia la categoría al producto
+            $product->setAttribute('category', [
+                'id' => $category->id ?? null,
+                'name' => $category->name ?? 'Sin categoría',
+                'sub_categories' => $product->subCategories->map(function ($sub) {
+                    return [
+                        'id' => $sub->id,
+                        'name' => $sub->name
+                    ];
+                })
+            ]);
 
-            // Opcional: eliminar la lista plana de sub_categories
+            // Agregar beneficios procesados
+            $product->setAttribute('benefits', explode('益', $product->benefits));
             $product->unsetRelation('subCategories');
 
             return $product;
@@ -444,31 +468,74 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function getProduct(string $nameProduct): JsonResponse
+    public function getProduct(int $productId): JsonResponse 
     {
         $product = Product::select(
-            'id',
-            'name',
-            'characteristics',
-            'benefits',
-            'compatibility',
-            'stock',
-            'price',
-            'status',
-            'pdf_id'
-        )
+                'id',
+                'name',
+                'characteristics',
+                'benefits',
+                'compatibility',
+                'stock',
+                'price',
+                'status',
+                'category_id',
+                'pdf_id'
+            )
             ->with([
-                'subcategories:id,name',
+                'category:id,name',
+                'subCategories:id,name',
                 'pdf:id,url',
                 'image:id,imageble_id,url'
             ])
-            ->where('name', $nameProduct)
-            ->get()
-            ->map(function (Product $item) {
-                $benefits = explode('益', $item->benefits);
-                $item->benefits = $benefits;
-                return $item;
-            });
-        return new JsonResponse(['data' => $product]);
+            ->where('id', $productId) 
+            ->first();
+    
+        if (!$product) {
+            return new JsonResponse(['data' => []]);
+        }
+    
+        $benefits = explode('益', $product->benefits);
+        $product->benefits = $benefits;
+    
+        $formattedProduct = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'characteristics' => $product->characteristics,
+            'benefits' => $product->benefits,
+            'compatibility' => $product->compatibility,
+            'price' => $product->price,
+            'stock' => $product->stock,
+            'status' => $product->status,
+            'category' => [
+                'id' => $product->category->id,
+                'name' => $product->category->name,
+                'sub_categories' => $product->subCategories->map(function ($subcategory) {
+                    return [
+                        'id' => $subcategory->id,
+                        'name' => $subcategory->name
+                    ];
+                })
+            ],
+            'image' => [
+                'id' => $product->image->id ?? null,
+                'url' => $product->image->url ?? null
+            ],
+            'pdf' => $product->pdf ? [
+                'id' => $product->pdf->id,
+                'url' => $product->pdf->url
+            ] : null,
+    
+            'selected_subcategory_ids' => $product->subCategories->pluck('id')
+        ];
+    
+        return new JsonResponse(['data' => [$formattedProduct]]);
     }
+    
+
+
+
+
+
+
 }
