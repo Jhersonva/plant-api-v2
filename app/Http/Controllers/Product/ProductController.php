@@ -103,7 +103,7 @@ class ProductController extends Controller
                 'characteristics' => $request->characteristics,
                 'benefits' => $benefits,
                 'compatibility' => $request->compatibility,
-                'price' => $request->price,
+                'price' => (float)$request->price,
                 'stock' => $request->stock,
                 'pdf_id' => $pdfId,
                 'category_id' => $request->category_id,
@@ -209,7 +209,7 @@ class ProductController extends Controller
             'characteristics' => $request->characteristics,
             'benefits' => implode('益', $request->benefits),
             'compatibility' => $request->compatibility,
-            'price' => $request->price,
+            'price' => (float)$request->price,
             'stock' => $request->stock,
             'status' => $request->stock == 0 ? false : true,
             'category_id' => $request->category_id,
@@ -259,39 +259,27 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function deleteProduct(int $id): JsonResponse
+    public function deleteProduct(int $productId): JsonResponse
     {
-        DB::transaction(function () use ($id) {
-            $product = Product::find($id);
+        $product = Product::find($productId);
 
-            if ($product) {
-                if ($product->image) {
-                    $this->deleteImage($product->image->url);
-                    $product->image()->delete();
-                }
+        if (!$product) {
+            throw new NotFoundProduct;
+        }
 
-                $pdf = $product->pdf;
+        if ($product->image) {
+            $this->deleteImage($product->image->url);
+            $product->image()->delete();
+        }
 
-                $product->delete();
+        if ($product->pdf) {
+            $this->deletePDF($product->pdf->url);
+            $product->pdf()->delete();
+        }
 
-                if ($pdf) {
-                    $this->deletePDF($pdf->url);
-                    $pdf->delete();
-                }
+        $product->delete();
 
-            } else {
-                $pdf = Pdf::find($id);
-
-                if ($pdf) {
-                    $this->deletePDF($pdf->url);
-                    $pdf->delete();
-                } else {
-                    throw new \Exception('Producto no encontrado');
-                }
-            }
-        });
-
-        return new JsonResponse(['data' => 'Producto eliminado correctamente']);
+        return new JsonResponse(['data' => 'Producto eliminado']);
     }
 
     /**
