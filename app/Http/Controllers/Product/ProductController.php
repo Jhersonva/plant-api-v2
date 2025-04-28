@@ -103,7 +103,7 @@ class ProductController extends Controller
                 'characteristics' => $request->characteristics,
                 'benefits' => $benefits,
                 'compatibility' => $request->compatibility,
-                'price' => $request->price,
+                'price' => (float)$request->price,
                 'stock' => $request->stock,
                 'pdf_id' => $pdfId,
                 'category_id' => $request->category_id,
@@ -220,7 +220,7 @@ class ProductController extends Controller
     }
 
     if ($request->filled('price')) {
-        $data['price'] = $request->price;
+        $data['price'] = (float)$request->price;
     }
 
     if ($request->filled('stock')) {
