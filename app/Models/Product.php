@@ -19,6 +19,11 @@ class Product extends Model
         'status',
         'category_id',
     ];
+
+    protected $casts = [
+        'price' => 'float',
+    ];
+
     protected $hidden = [
         'pdf_id',
         'category_id', 
