@@ -103,7 +103,7 @@ class ProductController extends Controller
                 'characteristics' => $request->characteristics,
                 'benefits' => $benefits,
                 'compatibility' => $request->compatibility,
-                'price' => (float)$request->price,
+                'price' => $request->price,
                 'stock' => $request->stock,
                 'pdf_id' => $pdfId,
                 'category_id' => $request->category_id,
@@ -188,48 +188,74 @@ class ProductController extends Controller
      * )
      */
     public function updateProduct(int $productId, Request $request)
-    {
-        $product = Product::find($productId);
-        if (!$product) {
-            throw new NotFoundProduct();
-        }
-
-        // Validar los datos del producto
-        $this->validateProducRequest($request);
-
-        // Sincronizar subcategorías
-        if ($request->has('subcategory_id')) {
-            $subcategoryIds = array_unique($request->subcategory_id);
-            $product->subCategories()->sync($subcategoryIds);
-        }
-
-        // Actualizar otros datos del producto
-        $product->update([
-            'name' => $request->name,
-            'characteristics' => $request->characteristics,
-            'benefits' => implode('益', $request->benefits),
-            'compatibility' => $request->compatibility,
-            'price' => (float)$request->price,
-            'stock' => $request->stock,
-            'status' => $request->stock == 0 ? false : true,
-            'category_id' => $request->category_id,
-        ]);
-
-        // Si se envía una imagen o un PDF, puedes agregar la lógica para actualizarlos aquí (opcional)
-        if ($request->has('image')) {
-            $product->image()->update([
-                'url' => $request->image['url'] ?? null,
-            ]);
-        }
-
-        if ($request->has('pdf')) {
-            $product->pdf()->update([
-                'url' => $request->pdf['url'] ?? null,
-            ]);
-        }
-
-        return new JsonResponse(['data' => $product], 200);
+{
+    $product = Product::find($productId);
+    if (!$product) {
+        throw new NotFoundProduct();
     }
+
+    $this->validatePartialProductRequest($request);
+
+    $data = [];
+
+    // Función que limpia los campos: quita espacios y verifica si realmente tiene contenido
+    $clean = function ($value) {
+        return isset($value) && trim($value) !== '';
+    };
+
+    if ($clean($request->name)) {
+        $data['name'] = trim($request->name);
+    }
+
+    if ($clean($request->characteristics)) {
+        $data['characteristics'] = trim($request->characteristics);
+    }
+
+    if ($request->filled('benefits') && is_array($request->benefits) && count($request->benefits) > 0) {
+        $data['benefits'] = implode('益', $request->benefits);
+    }
+
+    if ($clean($request->compatibility)) {
+        $data['compatibility'] = trim($request->compatibility);
+    }
+
+    if ($request->filled('price')) {
+        $data['price'] = $request->price;
+    }
+
+    if ($request->filled('stock')) {
+        $data['stock'] = $request->stock;
+        $data['status'] = $request->stock == 0 ? false : true;
+    }
+
+    if ($request->filled('category_id')) {
+        $data['category_id'] = $request->category_id;
+    }
+
+    if (!empty($data)) {
+        $product->update($data);
+    }
+
+    if ($request->has('subcategory_id')) {
+        $subcategoryIds = array_unique($request->subcategory_id);
+        $product->subCategories()->sync($subcategoryIds);
+    }
+
+    if ($request->has('image')) {
+        $product->image()->update([
+            'url' => $request->image['url'] ?? null,
+        ]);
+    }
+
+    if ($request->has('pdf')) {
+        $product->pdf()->update([
+            'url' => $request->pdf['url'] ?? null,
+        ]);
+    }
+
+    return new JsonResponse(['data' => $product->fresh()], 200);
+}
+
 
     /**
      * @OA\Delete(
@@ -259,27 +285,39 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function deleteProduct(int $productId): JsonResponse
+    public function deleteProduct(int $id): JsonResponse
     {
-        $product = Product::find($productId);
+        DB::transaction(function () use ($id) {
+            $product = Product::find($id);
 
-        if (!$product) {
-            throw new NotFoundProduct;
-        }
+            if ($product) {
+                if ($product->image) {
+                    $this->deleteImage($product->image->url);
+                    $product->image()->delete();
+                }
 
-        if ($product->image) {
-            $this->deleteImage($product->image->url);
-            $product->image()->delete();
-        }
+                $pdf = $product->pdf;
 
-        if ($product->pdf) {
-            $this->deletePDF($product->pdf->url);
-            $product->pdf()->delete();
-        }
+                $product->delete();
 
-        $product->delete();
+                if ($pdf) {
+                    $this->deletePDF($pdf->url);
+                    $pdf->delete();
+                }
 
-        return new JsonResponse(['data' => 'Producto eliminado']);
+            } else {
+                $pdf = Pdf::find($id);
+
+                if ($pdf) {
+                    $this->deletePDF($pdf->url);
+                    $pdf->delete();
+                } else {
+                    throw new \Exception('Producto no encontrado');
+                }
+            }
+        });
+
+        return new JsonResponse(['data' => 'Producto eliminado correctamente']);
     }
 
     /**
