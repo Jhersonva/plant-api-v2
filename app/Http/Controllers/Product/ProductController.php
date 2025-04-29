@@ -156,77 +156,80 @@ class ProductController extends Controller
 
 
     /**
-     * @OA\Put(
-     *     path="/api/products/{productId}",
-     *     summary="Actualizar un producto",
-     *     tags={"Products"},
-     *     @OA\Parameter(
-     *         name="nameProduct",
-     *         in="path",
-     *         required=true,
-     *         description="ID del producto a actualizar",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Fertilizante Orgánico"),
-     *             @OA\Property(property="description", type="string", example="Descripción actualizada"),
-     *             @OA\Property(property="characteristics", type="string", example="Mejora la calidad del suelo"),
-     *             @OA\Property(
-     *                 property="benefits",
-     *                 type="array",
-     *                 @OA\Items(type="string", example="Aumenta la producción")
-     *             ),
-     *             @OA\Property(property="compatibility", type="string", example="Compatible con cultivos de frutas"),
-     *             @OA\Property(property="price", type="number", format="float", example=49.99),
-     *             @OA\Property(property="stock", type="integer", example=100),
-     *             @OA\Property(property="category_id", type="integer", example=2),
-     *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={1, 2}),
-     *             @OA\Property(
-     *                 property="image",
-     *                 type="object",
-     *                 @OA\Property(property="url", type="string", example="data:image/png;base64,...")
-     *             ),
-     *             @OA\Property(
-     *                 property="pdf",
-     *                 type="object",
-     *                 @OA\Property(property="url", type="string", example="data:application/pdf;base64,...")
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Producto actualizado exitosamente",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Producto actualizado exitosamente")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Producto no encontrado",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Producto no encontrado")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Error en la validación de los datos",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Error de validación"),
-     *             @OA\Property(
-     *                 property="errors",
-     *                 type="object",
-     *                 @OA\Property(
-     *                     property="name",
-     *                     type="array",
-     *                     @OA\Items(type="string", example="El campo name es requerido")
-     *                 )
-     *             )
-     *         )
-     *     )
-     * )
-     */
+ * @OA\Put(
+ *     path="/api/products/{productId}",
+ *     summary="Actualizar un producto",
+ *     tags={"Products"},
+ *     @OA\Parameter(
+ *         name="productId",
+ *         in="path",
+ *         required=true,
+ *         description="ID del producto a actualizar",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="name", type="string", example="Fertilizante Orgánico"),
+ *             @OA\Property(property="description", type="string", example="Descripción actualizada"),
+ *             @OA\Property(property="characteristics", type="string", example="Mejora la calidad del suelo"),
+ *             @OA\Property(
+ *                 property="benefits",
+ *                 type="array",
+ *                 @OA\Items(type="string", example="Aumenta la producción")
+ *             ),
+ *             @OA\Property(property="compatibility", type="string", example="Compatible con cultivos de frutas"),
+ *             @OA\Property(property="price", type="number", format="float", example=49.99),
+ *             @OA\Property(property="stock", type="integer", example=100),
+ *             @OA\Property(property="category_id", type="integer", example=2),
+ *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={1, 2}),
+ *             @OA\Property(
+ *                 property="image",
+ *                 type="object",
+ *                 @OA\Property(property="id", type="integer", example=44),
+ *                 @OA\Property(property="url", type="string", example="data:image/jpg;base64,/9j/4AAQSkZJRgABAQE..")
+ *             ),
+ *             @OA\Property(
+ *                 property="pdf",
+ *                 type="object",
+ *                 @OA\Property(property="id", type="integer", example=52),
+ *                 @OA\Property(property="url", type="string", example="data:application/pdf;base64,JVBERi0xLjQKJdPr6e..")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Producto actualizado exitosamente",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Producto actualizado exitosamente")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Producto no encontrado",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Producto no encontrado")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Error en la validación de los datos",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="message", type="string", example="Error de validación"),
+ *             @OA\Property(
+ *                 property="errors",
+ *                 type="object",
+ *                 @OA\Property(
+ *                     property="name",
+ *                     type="array",
+ *                     @OA\Items(type="string", example="El campo name es requerido")
+ *                 )
+ *             )
+ *         )
+ *     )
+ * )
+ */
+
        public function updateProduct(int $productId, Request $request)
     {
         $product = Product::find($productId);

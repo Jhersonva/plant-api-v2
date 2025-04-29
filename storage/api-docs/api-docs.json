@@ -2568,17 +2568,154 @@
                 }
             }
         },
-<<<<<<< HEAD
         "/api/products/{productId}": {
-=======
-        "/api/products/{$productId}": {
->>>>>>> origin/master
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Obtener un producto por su Id",
+                "operationId": "fdc31fa5b728bd1f78ca01e14eeda6dd",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "Id del producto a consultar",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles del producto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 56
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Comida para caballos"
+                                                    },
+                                                    "characteristics": {
+                                                        "type": "string",
+                                                        "example": "Características del fertilizante"
+                                                    },
+                                                    "benefits": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string",
+                                                            "example": "Beneficio 1"
+                                                        }
+                                                    },
+                                                    "compatibility": {
+                                                        "type": "string",
+                                                        "example": "Compatible con Z"
+                                                    },
+                                                    "stock": {
+                                                        "type": "integer",
+                                                        "example": 20
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 45
+                                                    },
+                                                    "status": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "pdf_id": {
+                                                        "type": "integer",
+                                                        "example": 59
+                                                    },
+                                                    "subcategories": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 14
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "perro"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "image": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 91
+                                                            },
+                                                            "url": {
+                                                                "type": "string",
+                                                                "example": "http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "pdf": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 59
+                                                            },
+                                                            "url": {
+                                                                "type": "string",
+                                                                "example": "http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "category": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "perrunos"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "selected_subcategory_ids": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "integer",
+                                                "example": 14
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "put": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Actualizar un producto",
-<<<<<<< HEAD
                 "operationId": "5182aa292c61632e5b818e5f2adb1e1f",
                 "parameters": [
                     {
@@ -2588,17 +2725,6 @@
                         "required": true,
                         "schema": {
                             "type": "integer"
-=======
-                "operationId": "99ff3d7db084a50c9e3edde67bb8f7fd",
-                "parameters": [
-                    {
-                        "name": "$productId",
-                        "in": "path",
-                        "description": "Nombre del producto a actualizar",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
->>>>>>> origin/master
                         }
                     }
                 ],
@@ -2607,32 +2733,15 @@
                     "content": {
                         "application/json": {
                             "schema": {
-<<<<<<< HEAD
-=======
-                                "required": [
-                                    "name",
-                                    "characteristics",
-                                    "benefits",
-                                    "compatibility",
-                                    "price",
-                                    "stock",
-                                    "pdf",
-                                    "subcategory_id",
-                                    "image"
-                                ],
->>>>>>> origin/master
                                 "properties": {
                                     "name": {
                                         "type": "string",
                                         "example": "Fertilizante Orgánico"
                                     },
-<<<<<<< HEAD
                                     "description": {
                                         "type": "string",
                                         "example": "Descripción actualizada"
                                     },
-=======
->>>>>>> origin/master
                                     "characteristics": {
                                         "type": "string",
                                         "example": "Mejora la calidad del suelo"
@@ -2657,13 +2766,10 @@
                                         "type": "integer",
                                         "example": 100
                                     },
-<<<<<<< HEAD
                                     "category_id": {
                                         "type": "integer",
                                         "example": 2
                                     },
-=======
->>>>>>> origin/master
                                     "subcategory_id": {
                                         "type": "array",
                                         "items": {
@@ -2675,28 +2781,30 @@
                                         ]
                                     },
                                     "image": {
-<<<<<<< HEAD
                                         "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 44
+                                            },
                                             "url": {
                                                 "type": "string",
-                                                "example": "data:image/png;base64,..."
+                                                "example": "data:image/jpg;base64,/9j/4AAQSkZJRgABAQE.."
                                             }
                                         },
                                         "type": "object"
                                     },
                                     "pdf": {
                                         "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 52
+                                            },
                                             "url": {
                                                 "type": "string",
-                                                "example": "data:application/pdf;base64,..."
+                                                "example": "data:application/pdf;base64,JVBERi0xLjQKJdPr6e.."
                                             }
                                         },
                                         "type": "object"
-=======
-                                        "description": "Imagen en formato base64",
-                                        "type": "string",
-                                        "format": "binary"
->>>>>>> origin/master
                                     }
                                 },
                                 "type": "object"
@@ -2711,15 +2819,9 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-<<<<<<< HEAD
                                         "message": {
                                             "type": "string",
                                             "example": "Producto actualizado exitosamente"
-=======
-                                        "data": {
-                                            "type": "string",
-                                            "example": "Registro actualizado"
->>>>>>> origin/master
                                         }
                                     },
                                     "type": "object"
@@ -2764,247 +2866,6 @@
                                                 }
                                             },
                                             "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-<<<<<<< HEAD
-        "/api/products/{nameProduct}": {
-=======
-        "/api/products/{productId}": {
->>>>>>> origin/master
-            "get": {
-                "tags": [
-                    "Products"
-                ],
-<<<<<<< HEAD
-                "summary": "Obtener un producto por su nombre",
-                "operationId": "62f52ae87e2c2e8928382b63f7e04531",
-                "parameters": [
-                    {
-                        "name": "nameProduct",
-                        "in": "path",
-                        "description": "Nombre del producto a consultar",
-=======
-                "summary": "Obtener un producto por su Id",
-                "operationId": "fdc31fa5b728bd1f78ca01e14eeda6dd",
-                "parameters": [
-                    {
-                        "name": "productId",
-                        "in": "path",
-                        "description": "Id del producto a consultar",
->>>>>>> origin/master
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Detalles del producto",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer",
-<<<<<<< HEAD
-                                                        "example": 1
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Tomate"
-                                                    },
-                                                    "characteristics": {
-                                                        "type": "string",
-                                                        "example": "Color rojo, tamaño mediano"
-=======
-                                                        "example": 56
-                                                    },
-                                                    "name": {
-                                                        "type": "string",
-                                                        "example": "Comida para caballos"
-                                                    },
-                                                    "characteristics": {
-                                                        "type": "string",
-                                                        "example": "Características del fertilizante"
->>>>>>> origin/master
-                                                    },
-                                                    "benefits": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "type": "string",
-<<<<<<< HEAD
-                                                            "example": "Rico en vitaminas"
-=======
-                                                            "example": "Beneficio 1"
->>>>>>> origin/master
-                                                        }
-                                                    },
-                                                    "compatibility": {
-                                                        "type": "string",
-<<<<<<< HEAD
-                                                        "example": "Compatible con otros vegetales"
-                                                    },
-                                                    "stock": {
-                                                        "type": "integer",
-                                                        "example": 50
-=======
-                                                        "example": "Compatible con Z"
-                                                    },
-                                                    "stock": {
-                                                        "type": "integer",
-                                                        "example": 20
->>>>>>> origin/master
-                                                    },
-                                                    "price": {
-                                                        "type": "number",
-                                                        "format": "float",
-<<<<<<< HEAD
-                                                        "example": 2.5
-=======
-                                                        "example": 45
->>>>>>> origin/master
-                                                    },
-                                                    "status": {
-                                                        "type": "boolean",
-                                                        "example": true
-                                                    },
-                                                    "pdf_id": {
-                                                        "type": "integer",
-<<<<<<< HEAD
-                                                        "example": 5
-=======
-                                                        "example": 59
->>>>>>> origin/master
-                                                    },
-                                                    "subcategories": {
-                                                        "type": "array",
-                                                        "items": {
-                                                            "properties": {
-                                                                "id": {
-                                                                    "type": "integer",
-<<<<<<< HEAD
-                                                                    "example": 1
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "Verduras"
-=======
-                                                                    "example": 14
-                                                                },
-                                                                "name": {
-                                                                    "type": "string",
-                                                                    "example": "perro"
->>>>>>> origin/master
-                                                                }
-                                                            },
-                                                            "type": "object"
-                                                        }
-                                                    },
-<<<<<<< HEAD
-                                                    "pdf": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 10
-                                                            },
-                                                            "url": {
-                                                                "type": "string",
-                                                                "example": "https://example.com/document.pdf"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-=======
->>>>>>> origin/master
-                                                    "image": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-<<<<<<< HEAD
-                                                                "example": 20
-                                                            },
-                                                            "url": {
-                                                                "type": "string",
-                                                                "example": "https://example.com/image.jpg"
-=======
-                                                                "example": 91
-                                                            },
-                                                            "url": {
-                                                                "type": "string",
-                                                                "example": "http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg"
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    },
-                                                    "pdf": {
-                                                        "properties": {
-                                                            "id": {
-                                                                "type": "integer",
-                                                                "example": 59
-                                                            },
-                                                            "url": {
-                                                                "type": "string",
-                                                                "example": "http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf"
->>>>>>> origin/master
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-<<<<<<< HEAD
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Producto no encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Producto no encontrado"
-=======
-                                        },
-                                        "category": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 12
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "perrunos"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "selected_subcategory_ids": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "integer",
-                                                "example": 14
-                                            }
->>>>>>> origin/master
                                         }
                                     },
                                     "type": "object"
