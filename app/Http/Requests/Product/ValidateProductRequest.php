@@ -12,6 +12,7 @@ trait ValidateProductRequest
     {
         $request->validate([
             'name' => 'required|string|max:256|unique:products,name,' . $request->id, // Permite que el nombre del mismo producto no sea conflictivo
+            'description' => 'required|string|min:3|max:10000',
             'characteristics' => 'required|string|max:10000',
             'benefits' => 'required|array',
             'compatibility' => 'required|string|max:10000',
@@ -39,19 +40,22 @@ trait ValidateProductRequest
     {
         $request->validate([
             'name' => ['sometimes', 'string', 'max:256'],
+            'description' => ['sometimes', 'string', 'min:3', 'max:10000'],
             'characteristics' => ['sometimes', 'string', 'max:10000'],
             'benefits' => ['sometimes', 'array'],
-            'benefits.*' => ['sometimes', 'string', 'max:255'], // Cada beneficio individual
+            'benefits.*' => ['sometimes', 'string', 'max:255'],
             'compatibility' => ['sometimes', 'string', 'max:10000'],
             'price' => ['sometimes', 'numeric', 'min:1', 'max:999999.99'],
             'stock' => ['sometimes', 'integer', 'min:0', 'max:10000'],
             'image' => ['sometimes', 'nullable', 'array'],
-            'image.url' => ['required_with:image', 'string'],
             'image.id' => ['nullable', 'integer'],
+            'image.url' => ['required_with:image', 'string'],
             'category_id' => ['sometimes', 'exists:categories,id'],
             'subcategory_id' => ['sometimes', 'array', 'min:1'],
             'subcategory_id.*' => ['sometimes', 'exists:subcategories,id'],
-            'pdf' => ['sometimes', 'nullable', 'string'], // Base64 o url
+            'pdf' => ['sometimes', 'nullable', 'array'],
+            'pdf.id' => ['sometimes', 'integer'],
+            'pdf.url' => ['sometimes', 'string'],
         ]);
 
         // Validar que las subcategorías pertenezcan a la categoría seleccionada

@@ -100,6 +100,7 @@ class ProductController extends Controller
             // Crear el producto
             $product = Product::create([
                 'name' => $request->name,
+                'description' => $request->description,
                 'characteristics' => $request->characteristics,
                 'benefits' => $benefits,
                 'compatibility' => $request->compatibility,
@@ -118,6 +119,11 @@ class ProductController extends Controller
                 $product->image()->create([
                     'url' => $image
                 ]);
+            } else {
+                // Crear un registro de imagen vacío para que tenga un ID
+                $product->image()->create([
+                    'url' => null
+                ]);
             }
         });
 
@@ -127,21 +133,21 @@ class ProductController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/products/{nameProduct}",
+     *     path="/api/products/{productId}",
      *     summary="Actualizar un producto",
      *     tags={"Products"},
      *     @OA\Parameter(
-     *         name="nameProduct",
+     *         name="productId",
      *         in="path",
      *         required=true,
-     *         description="Nombre del producto a actualizar",
-     *         @OA\Schema(type="string")
+     *         description="ID del producto a actualizar",
+     *         @OA\Schema(type="integer")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name", "characteristics", "benefits", "compatibility", "price", "stock", "pdf", "subcategory_id", "image"},
      *             @OA\Property(property="name", type="string", example="Fertilizante Orgánico"),
+     *             @OA\Property(property="description", type="string", example="Descripción actualizada"),
      *             @OA\Property(property="characteristics", type="string", example="Mejora la calidad del suelo"),
      *             @OA\Property(
      *                 property="benefits",
@@ -151,15 +157,25 @@ class ProductController extends Controller
      *             @OA\Property(property="compatibility", type="string", example="Compatible con cultivos de frutas"),
      *             @OA\Property(property="price", type="number", format="float", example=49.99),
      *             @OA\Property(property="stock", type="integer", example=100),
-     *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={1,2}),
-     *             @OA\Property(property="image", type="string", format="binary", description="Imagen en formato base64")
+     *             @OA\Property(property="category_id", type="integer", example=2),
+     *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={1, 2}),
+     *             @OA\Property(
+     *                 property="image",
+     *                 type="object",
+     *                 @OA\Property(property="url", type="string", example="data:image/png;base64,...")
+     *             ),
+     *             @OA\Property(
+     *                 property="pdf",
+     *                 type="object",
+     *                 @OA\Property(property="url", type="string", example="data:application/pdf;base64,...")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Producto actualizado exitosamente",
      *         @OA\JsonContent(
-     *             @OA\Property(property="data", type="string", example="Registro actualizado")
+     *             @OA\Property(property="message", type="string", example="Producto actualizado exitosamente")
      *         )
      *     ),
      *     @OA\Response(
@@ -187,76 +203,87 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function updateProduct(int $productId, Request $request)
-{
-    $product = Product::find($productId);
-    if (!$product) {
-        throw new NotFoundProduct();
+       public function updateProduct(int $productId, Request $request)
+    {
+        $product = Product::find($productId);
+        if (!$product) {
+            throw new NotFoundProduct();
+        }
+    
+        $this->validatePartialProductRequest($request);
+    
+        $data = [];
+    
+        // Función que limpia los campos: quita espacios y verifica si realmente tiene contenido
+        $clean = function ($value) {
+            return isset($value) && trim($value) !== '';
+        };
+    
+        if ($clean($request->name)) {
+            $data['name'] = trim($request->name);
+        }
+        
+        if ($clean($request->description)) {
+            $data['description'] = trim($request->description);
+        }
+    
+        if ($clean($request->characteristics)) {
+            $data['characteristics'] = trim($request->characteristics);
+        }
+    
+        if ($request->filled('benefits') && is_array($request->benefits) && count($request->benefits) > 0) {
+            $data['benefits'] = implode('益', $request->benefits);
+        }
+    
+        if ($clean($request->compatibility)) {
+            $data['compatibility'] = trim($request->compatibility);
+        }
+    
+        if ($request->filled('price')) {
+            $data['price'] = (float)$request->price;
+        }
+    
+        if ($request->filled('stock')) {
+            $data['stock'] = $request->stock;
+            $data['status'] = $request->stock == 0 ? false : true;
+        }
+    
+        if ($request->filled('category_id')) {
+            $data['category_id'] = $request->category_id;
+        }
+    
+        if (!empty($data)) {
+            $product->update($data);
+        }
+    
+        if ($request->has('subcategory_id')) {
+            $subcategoryIds = array_unique($request->subcategory_id);
+            $product->subCategories()->sync($subcategoryIds);
+        }
+    
+        if ($request->has('image') && isset($request->image['url'])) {
+            $imageUrl = $this->saveImage($request->image['url'], 'products');
+        
+            if ($product->image) {
+                
+                $this->deleteImage($product->image->url);
+                
+                $product->image()->update([
+                    'url' => $imageUrl,
+                ]);
+            } else {
+                $product->image()->create([
+                    'url' => $imageUrl,
+                ]);
+            }
+        }
+    
+        if ($request->has('pdf')) {
+            $this->updatePDF($product, $request->pdf['url'] ?? null);
+        }
+    
+        return response()->json(['message' => 'Producto actualizado exitosamente'], 200);
     }
-
-    $this->validatePartialProductRequest($request);
-
-    $data = [];
-
-    // Función que limpia los campos: quita espacios y verifica si realmente tiene contenido
-    $clean = function ($value) {
-        return isset($value) && trim($value) !== '';
-    };
-
-    if ($clean($request->name)) {
-        $data['name'] = trim($request->name);
-    }
-
-    if ($clean($request->characteristics)) {
-        $data['characteristics'] = trim($request->characteristics);
-    }
-
-    if ($request->filled('benefits') && is_array($request->benefits) && count($request->benefits) > 0) {
-        $data['benefits'] = implode('益', $request->benefits);
-    }
-
-    if ($clean($request->compatibility)) {
-        $data['compatibility'] = trim($request->compatibility);
-    }
-
-    if ($request->filled('price')) {
-        $data['price'] = (float)$request->price;
-    }
-
-    if ($request->filled('stock')) {
-        $data['stock'] = $request->stock;
-        $data['status'] = $request->stock == 0 ? false : true;
-    }
-
-    if ($request->filled('category_id')) {
-        $data['category_id'] = $request->category_id;
-    }
-
-    if (!empty($data)) {
-        $product->update($data);
-    }
-
-    if ($request->has('subcategory_id')) {
-        $subcategoryIds = array_unique($request->subcategory_id);
-        $product->subCategories()->sync($subcategoryIds);
-    }
-
-    if ($request->has('image')) {
-        $product->image()->update([
-            'url' => $request->image['url'] ?? null,
-        ]);
-    }
-
-    if ($request->has('pdf')) {
-        $product->pdf()->update([
-            'url' => $request->pdf['url'] ?? null,
-        ]);
-    }
-
-    return new JsonResponse(['data' => $product->fresh()], 200);
-}
-
-
     /**
      * @OA\Delete(
      *     path="/api/products/{nameProduct}",
@@ -285,40 +312,40 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function deleteProduct(int $id): JsonResponse
-    {
-        DB::transaction(function () use ($id) {
-            $product = Product::find($id);
-
-            if ($product) {
-                if ($product->image) {
-                    $this->deleteImage($product->image->url);
-                    $product->image()->delete();
-                }
-
-                $pdf = $product->pdf;
-
-                $product->delete();
-
-                if ($pdf) {
-                    $this->deletePDF($pdf->url);
-                    $pdf->delete();
-                }
-
-            } else {
-                $pdf = Pdf::find($id);
-
-                if ($pdf) {
-                    $this->deletePDF($pdf->url);
-                    $pdf->delete();
+        public function deleteProduct(int $id): JsonResponse
+        {
+            DB::transaction(function () use ($id) {
+                $product = Product::find($id);
+    
+                if ($product) {
+                    if ($product->image) {
+                        $this->deleteImage($product->image->url);
+                        $product->image()->delete();
+                    }
+    
+                    $pdf = $product->pdf;
+    
+                    $product->delete();
+    
+                    if ($pdf) {
+                        $this->deletePDF($pdf->url);
+                        $pdf->delete();
+                    }
+    
                 } else {
-                    throw new \Exception('Producto no encontrado');
+                    $pdf = Pdf::find($id);
+    
+                    if ($pdf) {
+                        $this->deletePDF($pdf->url);
+                        $pdf->delete();
+                    } else {
+                        throw new \Exception('Producto no encontrado');
+                    }
                 }
-            }
-        });
-
-        return new JsonResponse(['data' => 'Producto eliminado correctamente']);
-    }
+            });
+    
+            return new JsonResponse(['data' => 'Producto eliminado correctamente']);
+        }
 
     /**
      * @OA\Get(
@@ -397,7 +424,7 @@ class ProductController extends Controller
         $limit = $request->query('limit');
 
         $user = auth('api')->user();
-        $products = Product::select('id', 'name', 'characteristics', 'benefits', 'compatibility', 'price', 'stock', 'status')
+        $products = Product::select('id', 'name', 'description', 'characteristics', 'benefits', 'compatibility', 'price', 'stock', 'status')
             ->with([
                 'subCategories.category:id,name', 
                 'image:id,imageble_id,url',
@@ -512,6 +539,7 @@ class ProductController extends Controller
         $product = Product::select(
                 'id',
                 'name',
+                'description',
                 'characteristics',
                 'benefits',
                 'compatibility',
@@ -540,6 +568,7 @@ class ProductController extends Controller
         $formattedProduct = [
             'id' => $product->id,
             'name' => $product->name,
+            'description' => $product->description,
             'characteristics' => $product->characteristics,
             'benefits' => $product->benefits,
             'compatibility' => $product->compatibility,
@@ -570,11 +599,4 @@ class ProductController extends Controller
     
         return new JsonResponse(['data' => [$formattedProduct]]);
     }
-    
-
-
-
-
-
-
 }
