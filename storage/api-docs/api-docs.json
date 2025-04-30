@@ -2568,154 +2568,6 @@
                 }
             }
         },
-        "/api/products/{$productId}": {
-            "put": {
-                "tags": [
-                    "Products"
-                ],
-                "summary": "Actualizar un producto",
-                "operationId": "99ff3d7db084a50c9e3edde67bb8f7fd",
-                "parameters": [
-                    {
-                        "name": "$productId",
-                        "in": "path",
-                        "description": "Nombre del producto a actualizar",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "characteristics",
-                                    "benefits",
-                                    "compatibility",
-                                    "price",
-                                    "stock",
-                                    "pdf",
-                                    "subcategory_id",
-                                    "image"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Fertilizante Orgánico"
-                                    },
-                                    "characteristics": {
-                                        "type": "string",
-                                        "example": "Mejora la calidad del suelo"
-                                    },
-                                    "benefits": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "example": "Aumenta la producción"
-                                        }
-                                    },
-                                    "compatibility": {
-                                        "type": "string",
-                                        "example": "Compatible con cultivos de frutas"
-                                    },
-                                    "price": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 49.99
-                                    },
-                                    "stock": {
-                                        "type": "integer",
-                                        "example": 100
-                                    },
-                                    "subcategory_id": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2
-                                        ]
-                                    },
-                                    "image": {
-                                        "description": "Imagen en formato base64",
-                                        "type": "string",
-                                        "format": "binary"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Producto actualizado exitosamente",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "string",
-                                            "example": "Registro actualizado"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Producto no encontrado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Producto no encontrado"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Error en la validación de los datos",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Error de validación"
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "name": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "El campo name es requerido"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/products/{productId}": {
             "get": {
                 "tags": [
@@ -2850,6 +2702,170 @@
                                                 "type": "integer",
                                                 "example": 14
                                             }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Actualizar un producto",
+                "operationId": "5182aa292c61632e5b818e5f2adb1e1f",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "description": "ID del producto a actualizar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Fertilizante Orgánico"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Descripción actualizada"
+                                    },
+                                    "characteristics": {
+                                        "type": "string",
+                                        "example": "Mejora la calidad del suelo"
+                                    },
+                                    "benefits": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "Aumenta la producción"
+                                        }
+                                    },
+                                    "compatibility": {
+                                        "type": "string",
+                                        "example": "Compatible con cultivos de frutas"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 49.99
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 100
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "subcategory_id": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ]
+                                    },
+                                    "image": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 44
+                                            },
+                                            "url": {
+                                                "type": "string",
+                                                "example": "data:image/jpg;base64,/9j/4AAQSkZJRgABAQE.."
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "pdf": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 52
+                                            },
+                                            "url": {
+                                                "type": "string",
+                                                "example": "data:application/pdf;base64,JVBERi0xLjQKJdPr6e.."
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Producto actualizado exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Producto actualizado exitosamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Producto no encontrado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error en la validación de los datos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Error de validación"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "El campo name es requerido"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
