@@ -2328,6 +2328,7 @@
                                         {
                                             "id": 56,
                                             "name": "Comida para caballos",
+                                            "description": "Este producto es ideal para la alimentación de caballos de trabajo y competición.",
                                             "characteristics": "Características del fertilizante",
                                             "benefits": [
                                                 "Beneficio 1",
@@ -2362,6 +2363,7 @@
                                         {
                                             "id": 57,
                                             "name": "Comida para canarios",
+                                            "description": "Alimento completo y balanceado diseñado especialmente para canarios.",
                                             "characteristics": "Características del fertilizante",
                                             "benefits": [
                                                 "Beneficio 1",
@@ -2418,6 +2420,7 @@
                             "schema": {
                                 "required": [
                                     "name",
+                                    "description",
                                     "characteristics",
                                     "benefits",
                                     "compatibility",
@@ -2432,6 +2435,11 @@
                                         "type": "string",
                                         "example": "Comida para canarios"
                                     },
+                                    "description": {
+                                        "description": "Se agrega la descripción del producto",
+                                        "type": "string",
+                                        "example": "Este producto es ideal para la alimentación diaria de canarios."
+                                    },
                                     "characteristics": {
                                         "type": "string",
                                         "example": "Características del fertilizante"
@@ -2440,12 +2448,12 @@
                                         "type": "array",
                                         "items": {
                                             "type": "string",
-                                            "example": "Beneficio 1"
+                                            "example": "Fortalece el plumaje"
                                         }
                                     },
                                     "compatibility": {
                                         "type": "string",
-                                        "example": "Compatible con Z"
+                                        "example": "Compatible con aves tropicales"
                                     },
                                     "price": {
                                         "type": "number",
@@ -2466,7 +2474,8 @@
                                             "type": "integer"
                                         },
                                         "example": [
-                                            14
+                                            14,
+                                            15
                                         ]
                                     },
                                     "image": {
@@ -2477,7 +2486,7 @@
                                             },
                                             "url": {
                                                 "type": "string",
-                                                "example": "http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg"
+                                                "example": "http://127.0.0.1:8000/storage/products/imagen.jpg"
                                             }
                                         },
                                         "type": "object"
@@ -2490,7 +2499,7 @@
                                             },
                                             "url": {
                                                 "type": "string",
-                                                "example": "http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf"
+                                                "example": "http://127.0.0.1:8000/storage/pdf/manual.pdf"
                                             }
                                         },
                                         "type": "object"
@@ -2605,6 +2614,10 @@
                                                         "type": "string",
                                                         "example": "Comida para caballos"
                                                     },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Este producto es ideal para la alimentación de caballos de trabajo y competición."
+                                                    },
                                                     "characteristics": {
                                                         "type": "string",
                                                         "example": "Características del fertilizante"
@@ -2678,30 +2691,46 @@
                                                             }
                                                         },
                                                         "type": "object"
+                                                    },
+                                                    "category": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "perrunos"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "selected_subcategory_ids": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer",
+                                                            "example": 14
+                                                        }
                                                     }
                                                 },
                                                 "type": "object"
                                             }
-                                        },
-                                        "category": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 12
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "perrunos"
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "selected_subcategory_ids": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "integer",
-                                                "example": 14
-                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Producto no encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Producto no encontrado"
                                         }
                                     },
                                     "type": "object"
@@ -4484,24 +4513,6 @@
                     }
                 },
                 "type": "object"
-            }
-        },
-        "responses": {
-            "404": {
-                "description": "Producto no encontrado",
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string",
-                                    "example": "Producto no encontrado"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
             }
         },
         "securitySchemes": {

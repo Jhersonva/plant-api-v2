@@ -34,11 +34,13 @@ class ProductController extends Controller
  *     path="/api/products",
  *     summary="Registrar un nuevo producto",
  *     tags={"Products"},
+ *
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
  *             required={
  *                 "name",
+ *                 "description",
  *                 "characteristics",
  *                 "benefits",
  *                 "compatibility",
@@ -48,32 +50,51 @@ class ProductController extends Controller
  *                 "subcategory_id",
  *                 "image"
  *             },
+ *
  *             @OA\Property(property="name", type="string", example="Comida para canarios"),
+ *
+ *             @OA\Property(
+ *                 property="description",
+ *                 type="string",
+ *                 example="Este producto es ideal para la alimentación diaria de canarios.",
+ *                 description="Se agrega la descripción del producto"
+ *             ),
+ *
  *             @OA\Property(property="characteristics", type="string", example="Características del fertilizante"),
+ *
  *             @OA\Property(
  *                 property="benefits",
  *                 type="array",
- *                 @OA\Items(type="string", example="Beneficio 1")
+ *                 @OA\Items(type="string", example="Fortalece el plumaje")
  *             ),
- *             @OA\Property(property="compatibility", type="string", example="Compatible con Z"),
+ *
+ *             @OA\Property(property="compatibility", type="string", example="Compatible con aves tropicales"),
+ *
  *             @OA\Property(property="price", type="number", format="float", example=45.00),
+ *
  *             @OA\Property(property="stock", type="integer", example=20),
+ *
  *             @OA\Property(property="category_id", type="integer", example=12),
- *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={14}),
+ *
+ *             @OA\Property(property="subcategory_id", type="array", @OA\Items(type="integer"), example={14, 15}),
+ *
  *             @OA\Property(property="image", type="object",
  *                 @OA\Property(property="id", type="integer", example=91),
- *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg")
+ *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/products/imagen.jpg")
  *             ),
+ *
  *             @OA\Property(property="pdf", type="object",
  *                 @OA\Property(property="id", type="integer", example=59),
- *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf")
+ *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/pdf/manual.pdf")
  *             )
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=201,
  *         description="Producto registrado exitosamente"
  *     ),
+ *
  *     @OA\Response(
  *         response=200,
  *         description="Producto registrado exitosamente",
@@ -81,6 +102,7 @@ class ProductController extends Controller
  *             @OA\Property(property="data", type="string", example="Producto registrado")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=409,
  *         description="El producto ya existe",
@@ -88,6 +110,7 @@ class ProductController extends Controller
  *             @OA\Property(property="message", type="string", example="El producto ya existe en la base de datos")
  *         )
  *     ),
+ *
  *     @OA\Response(
  *         response=422,
  *         description="Error en la validación de los datos",
@@ -106,6 +129,7 @@ class ProductController extends Controller
  *     )
  * )
  */
+
 
 
     public function storeProduct(Request $request): JsonResponse
@@ -388,6 +412,7 @@ class ProductController extends Controller
  *                     {
  *                         "id": 56,
  *                         "name": "Comida para caballos",
+ *                         "description": "Este producto es ideal para la alimentación de caballos de trabajo y competición.",
  *                         "characteristics": "Características del fertilizante",
  *                         "benefits": {
  *                             "Beneficio 1",
@@ -422,6 +447,7 @@ class ProductController extends Controller
  *                     {
  *                         "id": 57,
  *                         "name": "Comida para canarios",
+ *                         "description": "Alimento completo y balanceado diseñado especialmente para canarios.",
  *                         "characteristics": "Características del fertilizante",
  *                         "benefits": {
  *                             "Beneficio 1",
@@ -464,6 +490,7 @@ class ProductController extends Controller
  *     )
  * )
  */
+
 
 
 
@@ -536,63 +563,64 @@ class ProductController extends Controller
         ]);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/products/{productId}",
-     *     summary="Obtener un producto por su Id",
-     *     tags={"Products"},
-     *     @OA\Parameter(
-     *         name="productId",
-     *         in="path",
-     *         required=true,
-     *         description="Id del producto a consultar",
-     *         @OA\Schema(type="string")
-     *     ),
-*     @OA\Response(
-*         response=200,
-*         description="Detalles del producto",
-*         @OA\JsonContent(
-*             @OA\Property(property="data", type="array", @OA\Items(
-*                 @OA\Property(property="id", type="integer", example=56),
-*                 @OA\Property(property="name", type="string", example="Comida para caballos"),
-*                 @OA\Property(property="characteristics", type="string", example="Características del fertilizante"),
-*                 @OA\Property(property="benefits", type="array", @OA\Items(type="string", example="Beneficio 1")),
-*                 @OA\Property(property="compatibility", type="string", example="Compatible con Z"),
-*                 @OA\Property(property="stock", type="integer", example=20),
-*                 @OA\Property(property="price", type="number", format="float", example=45),
-*                 @OA\Property(property="status", type="boolean", example=true),
-*                 @OA\Property(property="pdf_id", type="integer", example=59),
-*                 @OA\Property(property="subcategories", type="array", @OA\Items(
-*                     @OA\Property(property="id", type="integer", example=14),
-*                     @OA\Property(property="name", type="string", example="perro")
-*                 )),
-*                 @OA\Property(property="image", type="object",
- *                 @OA\Property(property="id", type="integer", example=91),
- *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg")
- *             ),
- *             @OA\Property(property="pdf", type="object",
- *                 @OA\Property(property="id", type="integer", example=59),
- *                 @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf")
- *             )
+/**
+ * @OA\Get(
+ *     path="/api/products/{productId}",
+ *     summary="Obtener un producto por su Id",
+ *     tags={"Products"},
+ *     @OA\Parameter(
+ *         name="productId",
+ *         in="path",
+ *         required=true,
+ *         description="Id del producto a consultar",
+ *         @OA\Schema(type="string")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Detalles del producto",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="data", type="array", @OA\Items(
+ *                 @OA\Property(property="id", type="integer", example=56),
+ *                 @OA\Property(property="name", type="string", example="Comida para caballos"),
+ *                 @OA\Property(property="description", type="string", example="Este producto es ideal para la alimentación de caballos de trabajo y competición."),
+ *                 @OA\Property(property="characteristics", type="string", example="Características del fertilizante"),
+ *                 @OA\Property(property="benefits", type="array", @OA\Items(type="string", example="Beneficio 1")),
+ *                 @OA\Property(property="compatibility", type="string", example="Compatible con Z"),
+ *                 @OA\Property(property="stock", type="integer", example=20),
+ *                 @OA\Property(property="price", type="number", format="float", example=45),
+ *                 @OA\Property(property="status", type="boolean", example=true),
+ *                 @OA\Property(property="pdf_id", type="integer", example=59),
+ *                 @OA\Property(property="subcategories", type="array", @OA\Items(
+ *                     @OA\Property(property="id", type="integer", example=14),
+ *                     @OA\Property(property="name", type="string", example="perro")
+ *                 )),
+ *                 @OA\Property(property="image", type="object",
+ *                     @OA\Property(property="id", type="integer", example=91),
+ *                     @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/products/45c7cec3-131c-4f38-8d50-cc880970c7ac.jpg")
+ *                 ),
+ *                 @OA\Property(property="pdf", type="object",
+ *                     @OA\Property(property="id", type="integer", example=59),
+ *                     @OA\Property(property="url", type="string", example="http://127.0.0.1:8000/storage/pdf/ad228da4-78f2-4410-9956-a1b2e8fcf7ef.pdf")
+ *                 ),
+ *                 @OA\Property(property="category", type="object",
+ *                     @OA\Property(property="id", type="integer", example=12),
+ *                     @OA\Property(property="name", type="string", example="perrunos")
+ *                 ),
+ *                 @OA\Property(property="selected_subcategory_ids", type="array", @OA\Items(type="integer", example=14))
+ *             ))
  *         )
  *     ),
-*                 @OA\Property(property="category", type="object",
-*                     @OA\Property(property="id", type="integer", example=12),
-*                     @OA\Property(property="name", type="string", example="perrunos")
-*                 ),
-*                 @OA\Property(property="selected_subcategory_ids", type="array", @OA\Items(type="integer", example=14))
-*             ))
-*         )
-*     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Producto no encontrado",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="error", type="string", example="Producto no encontrado")
-     *         )
-     *     )
-     * )
-     */
+ *     @OA\Response(
+ *         response=404,
+ *         description="Producto no encontrado",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="error", type="string", example="Producto no encontrado")
+ *         )
+ *     )
+ * )
+ */
+
+
     public function getProduct(int $productId): JsonResponse 
     {
         $product = Product::select(
